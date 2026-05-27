@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class FileMetadata {
+public class FileEntity {
 
     @Id
     @GeneratedValue

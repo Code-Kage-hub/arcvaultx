@@ -1,11 +1,10 @@
 package com.codekage.arcvaultx.controller;
 
-import com.codekage.arcvaultx.entity.FileMetadata;
-import com.codekage.arcvaultx.repository.FileMetadataRepository;
+import com.codekage.arcvaultx.DTO.FileDTO;
 import com.codekage.arcvaultx.service.FileService;
-import com.codekage.arcvaultx.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,36 +18,63 @@ import java.io.IOException;
 public class FileController {
 
     private final FileService fileService;
-    private final FileMetadataRepository repository;
-    private final StorageService storageService;
 
+    /**
+     * Upload a file and save metadata
+     */
     @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam MultipartFile file) throws IOException {
+    public ResponseEntity<String> upload(@RequestParam MultipartFile file)
+            throws IOException {
+
         fileService.upload(file);
-        return ResponseEntity.ok("Uploaded");
+
+        return ResponseEntity.ok("Uploaded Successfully");
     }
 
+    /**
+     * Download file using file id
+     */
     @GetMapping("/download/{id}")
-    public ResponseEntity<Resource> download(@PathVariable Long id) throws Exception {
+    public ResponseEntity<Resource> download(@PathVariable Long id)
+            throws Exception {
 
-        FileMetadata meta = repository.findById(id).orElseThrow();
-
-        Resource file = storageService.download(meta.getFilePath());
+        Resource file = fileService.download(id);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + meta.getFileName() + "\"")
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getFilename() + "\""
+                )
                 .body(file);
     }
 
+    /**
+     * Delete physical file and metadata
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) throws IOException {
+    public ResponseEntity<String> delete(@PathVariable Long id)
+            throws Exception {
 
-        FileMetadata meta = repository.findById(id).orElseThrow();
+        fileService.delete(id);
 
-        storageService.delete(meta.getFilePath());
-        repository.delete(meta);
+        return ResponseEntity.ok("Deleted Successfully");
+    }
 
-        return ResponseEntity.ok("Deleted");
+    /**
+     * Get paginated file list
+     *
+     * Example:
+     * /api/files?page=0&size=5
+     */
+    @GetMapping
+    public ResponseEntity<Page<FileDTO>> getFiles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+
+        Page<FileDTO> filePage =
+                fileService.getFilesWithPagination(page, size);
+
+        return ResponseEntity.ok(filePage);
     }
 }

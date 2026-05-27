@@ -15,7 +15,7 @@ import java.util.UUID;
 @Service
 public class LocalStorageService implements StorageService {
 
-    private final String BASE_PATH = "C:/Users/ChaitanyaGandham/Downloads/storage/";
+    private final String BASE_PATH = "C:/Users/ChaitanyaGandham/Downloads/Storage/";
 
 
     @Override
