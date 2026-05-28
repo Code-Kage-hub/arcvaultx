@@ -1,5 +1,6 @@
 package com.codekage.arcvaultx.service;
 
+import com.codekage.arcvaultx.entity.User;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class LocalStorageService implements StorageService {
 
 
     @Override
-    public String upload(MultipartFile file, String user) throws IOException {
+    public String upload(MultipartFile file, User user) throws IOException {
 
         String userDir = BASE_PATH + "users/" + user + "/";
         File dir = new File(userDir);

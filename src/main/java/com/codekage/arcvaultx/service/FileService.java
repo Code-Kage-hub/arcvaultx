@@ -1,8 +1,11 @@
 package com.codekage.arcvaultx.service;
 
 import com.codekage.arcvaultx.DTO.FileDTO;
-import com.codekage.arcvaultx.entity.FileEntity;
+import com.codekage.arcvaultx.entity.FileMetaData;
+import com.codekage.arcvaultx.entity.Folder;
+import com.codekage.arcvaultx.entity.User;
 import com.codekage.arcvaultx.repository.FileMetadataRepository;
+import com.codekage.arcvaultx.repository.FolderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -19,43 +22,54 @@ import java.time.LocalDateTime;
 public class FileService {
 
     private final StorageService storageService;
-    private final FileMetadataRepository repository;
+    private final FileMetadataRepository fileRepository;
+    private final FolderRepository folderRepository;
 
-    String user = "testUser"; // later from JWT
+    User user = new User(1L, "testUser"); // later from JWT
 
-    public void upload(MultipartFile file) throws IOException {
+    public void upload(MultipartFile file, Long folderId) throws IOException {
 
         String path = storageService.upload(file, user);
 
-        FileEntity meta = new FileEntity();
-        meta.setFileName(file.getOriginalFilename());
+        FileMetaData meta = new FileMetaData();
+        meta.setOriginalFileName(file.getOriginalFilename());
         meta.setFilePath(path);
         meta.setFileType(file.getContentType());
         meta.setSize(file.getSize());
-        meta.setOwner(user);
-        meta.setCreatedAt(LocalDateTime.now());
+        meta.setUser(user);
+        meta.setUploadAt(LocalDateTime.now());
+        meta.setFolderId(folderId);
 
-        repository.save(meta);
+        fileRepository.save(meta);
     }
 
     public Resource download(Long id) throws Exception{
-        FileEntity meta = repository.findById(id).orElseThrow();
+        FileMetaData meta = fileRepository.findById(id).orElseThrow();
         Resource file = storageService.download(meta.getFilePath());
         return file;
     }
 
     public String delete(Long id) throws Exception{
-        FileEntity meta = repository.findById(id).orElseThrow();
+        FileMetaData meta = fileRepository.findById(id).orElseThrow();
         storageService.delete(meta.getFilePath());
-        repository.delete(meta);
+        fileRepository.delete(meta);
         return "Deleted";
     }
 
     public Page<FileDTO> getFilesWithPagination(int page, int size){
         Pageable pageable = PageRequest.of(page,size);
-        Page<FileEntity> fileMetadata =  repository.findAll(pageable);
+        Page<FileMetaData> fileMetadata =  fileRepository.findAll(pageable);
         Page<FileDTO> responses = fileMetadata.map(FileDTO::new);
         return responses;
      }
+     
+     public void uploadFolder(String name, Folder folderId)throws  Exception{
+        Folder folder = new Folder();
+        folder.setParentFolder(folderId);
+        folder.setFolderName(name);
+        folder.setUser(user);
+        folderRepository.save(folder);
+     }
+    
 
 }

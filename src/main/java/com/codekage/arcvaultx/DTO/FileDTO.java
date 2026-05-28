@@ -1,6 +1,6 @@
 package com.codekage.arcvaultx.DTO;
 
-import com.codekage.arcvaultx.entity.FileEntity;
+import com.codekage.arcvaultx.entity.FileMetaData;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,11 +13,11 @@ public class FileDTO {
     private long fileSize;
     private LocalDateTime createdAt;
 
-    public FileDTO(FileEntity metadata){
+    public FileDTO(FileMetaData metadata){
         this.fileId = metadata.getId();
-        this.filename = metadata.getFileName();
+        this.filename = metadata.getOriginalFileName();
         this.fileType = metadata.getFileType();
         this.fileSize = metadata.getSize();
-        this.createdAt = metadata.getCreatedAt();
+        this.createdAt = metadata.getUploadAt();
     }
 }

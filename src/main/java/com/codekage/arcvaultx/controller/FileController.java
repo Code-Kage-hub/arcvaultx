@@ -1,6 +1,7 @@
 package com.codekage.arcvaultx.controller;
 
 import com.codekage.arcvaultx.DTO.FileDTO;
+import com.codekage.arcvaultx.DTO.FolderRequest;
 import com.codekage.arcvaultx.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -23,10 +24,10 @@ public class FileController {
      * Upload a file and save metadata
      */
     @PostMapping("/upload")
-    public ResponseEntity<String> upload(@RequestParam MultipartFile file)
+    public ResponseEntity<String> upload(@RequestParam MultipartFile file, @RequestParam(defaultValue = "1") Long folderId)
             throws IOException {
 
-        fileService.upload(file);
+        fileService.upload(file, folderId);
 
         return ResponseEntity.ok("Uploaded Successfully");
     }
@@ -76,5 +77,11 @@ public class FileController {
                 fileService.getFilesWithPagination(page, size);
 
         return ResponseEntity.ok(filePage);
+    }
+
+    @PostMapping("/folders")
+    public ResponseEntity<String> uploadFolders(@RequestBody FolderRequest request)throws  Exception{
+        fileService.uploadFolder(request.getFolderName(),request.getFolderId());
+        return ResponseEntity.ok("Folder Created");
     }
 }
