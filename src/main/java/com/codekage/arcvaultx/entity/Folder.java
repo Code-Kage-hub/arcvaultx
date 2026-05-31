@@ -21,6 +21,7 @@ public class Folder {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name="parent_folder_id")
     private Folder parentFolder;
 
     private LocalDateTime createdDt;

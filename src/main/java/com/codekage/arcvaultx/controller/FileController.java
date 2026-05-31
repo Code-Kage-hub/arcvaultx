@@ -2,6 +2,7 @@ package com.codekage.arcvaultx.controller;
 
 import com.codekage.arcvaultx.DTO.FileDTO;
 import com.codekage.arcvaultx.DTO.FolderRequest;
+import com.codekage.arcvaultx.entity.Folder;
 import com.codekage.arcvaultx.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
@@ -24,7 +26,7 @@ public class FileController {
      * Upload a file and save metadata
      */
     @PostMapping("/upload")
-    public ResponseEntity<String> upload(@RequestParam MultipartFile file, @RequestParam(defaultValue = "1") Long folderId)
+    public ResponseEntity<String> upload(@RequestParam MultipartFile file, @RequestParam(defaultValue = "1") Folder folderId)
             throws IOException {
 
         fileService.upload(file, folderId);
@@ -81,7 +83,15 @@ public class FileController {
 
     @PostMapping("/folders")
     public ResponseEntity<String> uploadFolders(@RequestBody FolderRequest request)throws  Exception{
-        fileService.uploadFolder(request.getFolderName(),request.getFolderId());
+        fileService.uploadFolder(request.getFolderName(),request.getParentFolderId());
         return ResponseEntity.ok("Folder Created");
+    }
+
+    @GetMapping("/{parentFolderId}/contents")
+    public ResponseEntity<Map<String, Object>> browseFolder(@PathVariable Long parentFolderId,
+                                                                @RequestParam(defaultValue = "10") int size,
+                                                                @RequestParam(defaultValue = "0") int pageNum)throws Exception{
+        Map<String, Object> folderResponse = fileService.getFolderContents(parentFolderId, size, pageNum);
+        return ResponseEntity.ok(folderResponse);
     }
 }

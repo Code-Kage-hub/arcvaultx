@@ -20,12 +20,11 @@ public class FileMetaData {
     private String fileType;
     private Long size;
 
-    private Long folderId;
-
     @ManyToOne
     private User user;
 
     @ManyToOne
+    @JoinColumn(name="folder_id")
     private Folder folder;
 
     private LocalDateTime uploadAt;
