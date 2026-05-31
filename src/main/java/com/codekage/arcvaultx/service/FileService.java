@@ -30,7 +30,7 @@ public class FileService {
 
     User user = new User(1L, "testUser"); // later from JWT
 
-    public void upload(MultipartFile file, Folder folderId) throws IOException {
+    public void upload(MultipartFile file, Long folderId) throws IOException {
 
         String path = storageService.upload(file, user);
 
@@ -41,7 +41,7 @@ public class FileService {
         meta.setSize(file.getSize());
         meta.setUser(user);
         meta.setUploadAt(LocalDateTime.now());
-        meta.setFolder(folderId);
+        meta.setId(folderId);
 
         fileRepository.save(meta);
     }
@@ -65,56 +65,5 @@ public class FileService {
         Page<FileDTO> responses = fileMetadata.map(FileDTO::new);
         return responses;
     }
-     
-     public void uploadFolder(String name, Long folderId)throws  Exception{
-        Folder folder = new Folder();
-        folder.setFolderId(folderId);
-        folder.setFolderName(name);
-        folder.setUser(user);
-        folderRepository.save(folder);
-     }
-
-     public Map<String, Object> getFolderContents(Long parentFolderId, int size, int page){
-
-        Folder currentFolder = folderRepository.findById(parentFolderId).orElseThrow(() -> new RuntimeException("Folder not found"));
-
-         Pageable pageable = PageRequest.of(page, size);
-
-         // fetch files
-         Page<FileMetaData> filePage = fileRepository
-                 .findByFolder(currentFolder, pageable);
-
-         // fetch folders
-         Page<Folder> folderPage = folderRepository
-                 .findByParentFolder(currentFolder, pageable);
-
-         // convert to combined DTO
-         List<FolderContentDTO> files = filePage.getContent()
-                 .stream()
-                 .map(FolderContentDTO::fromFile)
-                 .toList();
-
-         List<FolderContentDTO> folders = folderPage.getContent()
-                 .stream()
-                 .map(FolderContentDTO::fromFolder)
-                 .toList();
-
-         // merge both lists
-         List<FolderContentDTO> combined = new ArrayList<>();
-         combined.addAll(folders);   // folders first
-         combined.addAll(files);     // then files
-
-         // build response
-         Map<String, Object> response = new HashMap<>();
-         response.put("contents", combined);
-         response.put("totalFiles", filePage.getTotalElements());
-         response.put("totalFolders", folderPage.getTotalElements());
-         response.put("currentPage", page);
-         response.put("pageSize", size);
-
-         return response;
-
-     }
-
 
 }

@@ -13,17 +13,8 @@ public class FolderContentDTO {
 
     private Long id;
     private String name;
-    private String type;        // "FILE" or "FOLDER"
+    private String type;
 
-    // file specific
-    private Long fileId;
-    private String fileName;
-
-    // folder specific
-    private Long folderId;
-    private String folderName;
-
-    // factory methods for clean creation
     public static FolderContentDTO fromFile(FileMetaData file) {
         FolderContentDTO dto = new FolderContentDTO();
         dto.setType("FILE");
